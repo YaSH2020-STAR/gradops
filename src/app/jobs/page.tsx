@@ -52,9 +52,13 @@ function JobsContent() {
     setLoading(true);
     setError(null);
     fetch(`/api/jobs?${params}`)
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
+      .then(async (r) => {
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          const msg = data?.error ?? data?.details ?? `HTTP ${r.status}`;
+          throw new Error(msg);
+        }
+        return data;
       })
       .then((data) => {
         setJobs(data.jobs ?? []);

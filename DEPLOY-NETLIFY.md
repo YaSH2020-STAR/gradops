@@ -68,7 +68,16 @@ git push -u origin main
 
 ---
 
-## 4. Set environment variables
+## 4. Get a free hosted database (Neon)
+
+1. Go to **[neon.tech](https://neon.tech)** and sign up (free, GitHub login works).
+2. Click **New Project** → name it e.g. `gradops` → **Create project**.
+3. On the project dashboard, open the **Connection details** (or **SQL Editor** → connection string). Copy the **connection string** (starts with `postgresql://...`). It may include `?sslmode=require` — that’s fine.
+4. Keep this URL for the next step (Netlify env vars and local `db:setup`).
+
+---
+
+## 5. Set environment variables
 
 Netlify needs a **hosted database** and auth/config. In Netlify: **Site settings** → **Environment variables** → **Add variable** / **Import from .env**.
 
@@ -76,7 +85,7 @@ Add at least:
 
 | Variable | Description |
 |----------|-------------|
-| `DATABASE_URL` | Postgres connection string from a **hosted** provider (e.g. [Neon](https://neon.tech), [Supabase](https://supabase.com), [Railway](https://railway.app)). Your local `localhost` URL will not work on Netlify. |
+| `DATABASE_URL` | The **Neon** connection string you copied above. |
 | `NEXTAUTH_URL` | Your site URL, e.g. `https://your-site-name.netlify.app` (update after first deploy if needed). |
 | `NEXTAUTH_SECRET` | Random string (e.g. `openssl rand -base64 32`). |
 
@@ -93,19 +102,18 @@ Then: **Trigger deploy** → **Deploy site** (or push a commit) so the build run
 
 ---
 
-## 5. Database: migrations and seed
+## 6. Database: migrations and seed
 
 Netlify does not run migrations or seed for you. After the first deploy:
 
-1. **Apply schema** to your hosted DB (from your **local** machine, with `DATABASE_URL` pointing at the same hosted DB):
+1. **Apply schema and seed** to your Neon DB (from your **local** machine, one time):
 
    ```bash
-   cd gradops
-   DATABASE_URL="postgresql://..." npx prisma db push
-   npm run db:seed
+   cd /Users/yashdorshetwar/Desktop/version19/gradops
+   DATABASE_URL="postgresql://USER:PASSWORD@HOST/DB?sslmode=require" npm run db:setup
    ```
 
-   Or use the hosted provider’s SQL console and run migrations manually if you use `prisma migrate`.
+   Replace the `DATABASE_URL` value with your **Neon** connection string from the Neon dashboard.
 
 2. **Optional:** Run ingestion once to fill jobs:
 
@@ -117,7 +125,7 @@ Netlify does not run migrations or seed for you. After the first deploy:
 
 ---
 
-## 6. (Optional) Automate job ingestion
+## 7. (Optional) Automate job ingestion
 
 To refresh jobs on a schedule, use a free cron service (e.g. [cron-job.org](https://cron-job.org)) to call:
 
@@ -133,6 +141,7 @@ See **GET-MORE-JOBS.md** §5 for details.
 
 1. Create new GitHub repo → push GradOps into it (Option A or B).
 2. Netlify → Import repo → build command: `npx prisma generate && npm run build`.
-3. Set env vars (especially `DATABASE_URL` with a **hosted** Postgres, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`).
-4. Run `prisma db push` and `db:seed` (and optionally `ingest`) against the hosted DB.
-5. Redeploy; then optionally set up cron for `/api/cron/ingest`.
+3. Create free **Neon** project at [neon.tech](https://neon.tech) and copy the connection string.
+4. Set env vars in Netlify: `DATABASE_URL` (Neon URL), `NEXTAUTH_URL`, `NEXTAUTH_SECRET`.
+5. Run `npm run db:setup` once with `DATABASE_URL` set to the Neon URL (so the hosted DB has tables + seed data).
+6. Redeploy; then optionally set up cron for `/api/cron/ingest`.

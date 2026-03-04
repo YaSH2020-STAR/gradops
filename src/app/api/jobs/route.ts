@@ -11,6 +11,12 @@ function getParam(sp: URLSearchParams, key: string): string | undefined {
 }
 
 export async function GET(req: Request) {
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json(
+      { error: 'DATABASE_URL is not set. Add it in Netlify → Site settings → Environment variables.' },
+      { status: 500 }
+    );
+  }
   const { searchParams } = new URL(req.url);
   const parsed = jobSearchQuerySchema.safeParse({
     q: getParam(searchParams, 'q'),
@@ -81,25 +87,37 @@ export async function GET(req: Request) {
         ? [{ salaryMax: 'desc' }, { postedAt: 'desc' }]
         : [{ postedAt: 'desc' }];
 
-  const [jobs, total] = await Promise.all([
-    prisma.job.findMany({
-      where,
-      orderBy,
-      skip: (page - 1) * limit,
-      take: limit,
-      include: {
-        recentGradScore: true,
-        employer: true,
-      },
-    }),
-    prisma.job.count({ where }),
-  ]);
+  try {
+    const [jobs, total] = await Promise.all([
+      prisma.job.findMany({
+        where,
+        orderBy,
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          recentGradScore: true,
+          employer: true,
+        },
+      }),
+      prisma.job.count({ where }),
+    ]);
 
-  return NextResponse.json({
-    jobs,
-    total,
-    page,
-    limit,
-    totalPages: Math.ceil(total / limit),
-  });
+    return NextResponse.json({
+      jobs,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    console.error('Jobs API error:', e);
+    return NextResponse.json(
+      {
+        error: 'Could not load jobs',
+        details: message,
+      },
+      { status: 500 }
+    );
+  }
 }
