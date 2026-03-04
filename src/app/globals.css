@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #ff8975;
+  --dark: #0e0e0e;
+  --dark-bg: #141414;
+  --light: #ffffff;
+  --gray1: #acafb9;
+  --gray2: #d5d5d5;
+  --gray3: #606165;
+  --stroke: #2c2c2c;
+}
+
+body {
+  @apply bg-darkBg text-light antialiased;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+@layer base {
+  * {
+    @apply border-stroke;
+  }
+}
