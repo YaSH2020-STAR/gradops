@@ -18,7 +18,7 @@ export function Navbar() {
           Early-career roles only (0–2 years)
         </p>
         <nav className="flex items-center gap-4">
-          <Link href="/jobs" className="text-sm text-gray2 hover:text-light">
+          <Link href="/jobs" className="text-sm text-gray2 hover:text-gradient-primary transition-colors">
             Browse Jobs
           </Link>
           {status === 'loading' ? (

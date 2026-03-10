@@ -63,13 +63,13 @@ export default function HomePage() {
               This platform lists only early-career roles (0–2 years).
             </p>
             <div className="mt-6 flex justify-center gap-8">
-              <Link href="/jobs" className="text-primary hover:underline text-sm">
+              <Link href="/jobs" className="text-gradient-primary hover:opacity-90 text-sm font-medium">
                 Browse jobs
               </Link>
-              <Link href="/auth/signup" className="text-primary hover:underline text-sm">
+              <Link href="/auth/signup" className="text-gradient-primary hover:opacity-90 text-sm font-medium">
                 Sign up as job seeker
               </Link>
-              <Link href="/auth/signup" className="text-primary hover:underline text-sm">
+              <Link href="/auth/signup" className="text-gradient-primary hover:opacity-90 text-sm font-medium">
                 Post jobs as employer
               </Link>
             </div>

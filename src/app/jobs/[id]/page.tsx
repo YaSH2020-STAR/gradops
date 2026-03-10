@@ -49,9 +49,17 @@ export default async function JobDetailPage({
           </div>
           <div className="flex flex-wrap gap-2">
             <SaveJobButton jobId={job.id} />
-            <Badge className="bg-primary/20 text-primary border-0">{fitLabel}</Badge>
+            <Badge className="bg-gradient-primary-soft text-primaryFrom border-0 font-medium">{fitLabel}</Badge>
             <Button asChild>
-              <a href={job.canonicalUrl} target="_blank" rel="noopener noreferrer">
+              <a
+                href={
+                  job.canonicalUrl && !job.canonicalUrl.includes('example.com')
+                    ? job.canonicalUrl
+                    : job.sourceUrl || job.canonicalUrl || '#'
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Apply
               </a>
             </Button>
@@ -88,10 +96,10 @@ export default async function JobDetailPage({
             Source: {job.sourceName}
             {job.sourceUrl && (
               <a
-                href={job.sourceUrl}
+                href={job.sourceUrl || job.canonicalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="ml-2 text-primary hover:underline"
+                className="ml-2 text-gradient-primary hover:opacity-90 font-medium"
               >
                 Original
               </a>

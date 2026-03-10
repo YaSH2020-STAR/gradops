@@ -82,7 +82,7 @@ export async function GET(req: Request) {
 
   const orderBy: Prisma.JobOrderByWithRelationInput[] =
     sort === 'fit'
-      ? [{ postedAt: 'desc' }]
+      ? [{ recentGradScore: { score: 'desc' } }, { postedAt: 'desc' }]
       : sort === 'salary'
         ? [{ salaryMax: 'desc' }, { postedAt: 'desc' }]
         : [{ postedAt: 'desc' }];

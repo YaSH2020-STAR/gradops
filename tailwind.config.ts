@@ -10,7 +10,10 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: '#FF8975',
+        primary: '#e8795c',
+        primaryFrom: '#a855f7',
+        primaryVia: '#c2410c',
+        primaryTo: '#ea580c',
         dark: '#0E0E0E',
         darkBg: '#141414',
         light: '#FFFFFF',
@@ -18,6 +21,10 @@ const config: Config = {
         gray2: '#D5D5D5',
         gray3: '#606165',
         stroke: '#2C2C2C',
+      },
+      backgroundImage: {
+        'gradient-primary': 'linear-gradient(135deg, #a855f7 0%, #c2410c 50%, #ea580c 100%)',
+        'gradient-primary-soft': 'linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(234,88,12,0.15) 100%)',
       },
       fontFamily: {
         sans: ['var(--font-inter-tight)', 'Inter', 'system-ui', 'sans-serif'],

@@ -34,15 +34,15 @@ export function JobCard({ job }: { job: Job }) {
   const fitLabel = score != null ? (score >= 70 ? 'Great fit' : score >= 50 ? 'Good fit' : 'Possible fit') : null;
 
   return (
-    <Link href={`/jobs/${job.id}`}>
-      <article className="block rounded-xl border border-stroke bg-dark p-5 hover:border-gray3 transition-colors">
+    <Link href={`/jobs/${job.id}`} className="block">
+      <article className="rounded-xl border border-stroke bg-dark p-5 transition-all duration-200 hover:border-primaryFrom/50 hover:shadow-lg hover:shadow-primaryFrom/10">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
             <h3 className="font-semibold text-light">{job.title}</h3>
             <p className="text-sm text-gray2 mt-0.5">{job.companyName}</p>
           </div>
           {fitLabel && (
-            <Badge variant="secondary" className="bg-primary/20 text-primary border-0">
+            <Badge variant="secondary" className="bg-gradient-primary-soft text-primaryFrom border-0 font-medium">
               {fitLabel}
             </Badge>
           )}

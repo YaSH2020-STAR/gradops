@@ -3,7 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --primary: #ff8975;
+  /* Iridescent gradient: deep purple/magenta → warm red-orange */
+  --primary: #e8795c;
+  --primary-from: #a855f7;
+  --primary-via: #c2410c;
+  --primary-to: #ea580c;
   --dark: #0e0e0e;
   --dark-bg: #141414;
   --light: #ffffff;
@@ -21,5 +25,19 @@ body {
 @layer base {
   * {
     @apply border-stroke;
+  }
+}
+
+/* Gradient accent for buttons, links, and highlights */
+@layer utilities {
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, var(--primary-from) 0%, var(--primary-via) 50%, var(--primary-to) 100%);
+  }
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #a855f7 0%, #c2410c 50%, #ea580c 100%);
+  }
+  .ring-gradient-primary {
+    box-shadow: 0 0 0 2px transparent, 0 0 20px -5px var(--primary-from), 0 0 40px -10px var(--primary-to);
   }
 }

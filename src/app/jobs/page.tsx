@@ -23,13 +23,22 @@ type Job = {
   recentGradScore?: { score: number; reasons: unknown } | null;
 };
 
+const DEFAULT_COUNTRY = 'USA';
+const NEARBY_CITIES = [
+  'New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia',
+  'San Antonio', 'San Diego', 'Dallas', 'San Jose', 'Austin', 'Seattle',
+  'Boston', 'Denver', 'Atlanta', 'Miami', 'Remote',
+];
+
 function JobsContent() {
   const searchParams = useSearchParams();
   const [q, setQ] = useState(searchParams.get('q') ?? '');
-  const [country, setCountry] = useState(searchParams.get('country') ?? '');
+  const [country, setCountry] = useState(searchParams.get('country') ?? DEFAULT_COUNTRY);
+  const [city, setCity] = useState(searchParams.get('city') ?? '');
   const [remote, setRemote] = useState(searchParams.get('remote') ?? '');
   const [jobType, setJobType] = useState(searchParams.get('jobType') ?? '');
   const [datePosted, setDatePosted] = useState(searchParams.get('datePosted') ?? '');
+  const [sort, setSort] = useState(searchParams.get('sort') ?? 'recent');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -40,13 +49,15 @@ function JobsContent() {
     const p = new URLSearchParams();
     if (q) p.set('q', q);
     if (country) p.set('country', country);
+    if (city) p.set('city', city);
     if (remote) p.set('remote', remote);
     if (jobType) p.set('jobType', jobType);
     if (datePosted) p.set('datePosted', datePosted);
+    if (sort) p.set('sort', sort);
     p.set('page', String(page));
     p.set('limit', '20');
     return p;
-  }, [q, country, remote, jobType, datePosted, page]);
+  }, [q, country, city, remote, jobType, datePosted, sort, page]);
 
   useEffect(() => {
     setLoading(true);
@@ -72,16 +83,18 @@ function JobsContent() {
       .finally(() => setLoading(false));
   }, [params.toString()]);
 
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSearch(e?: React.FormEvent) {
+    e?.preventDefault();
     setPage(1);
     setLoading(true);
     const p = new URLSearchParams();
     if (q) p.set('q', q);
     if (country) p.set('country', country);
+    if (city) p.set('city', city);
     if (remote) p.set('remote', remote);
     if (jobType) p.set('jobType', jobType);
     if (datePosted) p.set('datePosted', datePosted);
+    if (sort) p.set('sort', sort);
     p.set('page', '1');
     p.set('limit', '20');
     fetch(`/api/jobs?${p}`)
@@ -95,15 +108,41 @@ function JobsContent() {
       .finally(() => setLoading(false));
   }
 
+  function setNearby(location: string) {
+    if (location === 'Remote') {
+      setCity('');
+      setRemote('REMOTE');
+    } else {
+      setCity(location);
+      setRemote('');
+    }
+    setPage(1);
+  }
+
   const totalPages = Math.ceil(total / 20);
 
   return (
     <div className="min-h-screen bg-darkBg">
       <Navbar />
       <main className="container mx-auto px-4 py-6">
-        <p className="text-sm text-gray3 mb-4">
-          This platform lists only early-career roles (0–2 years).
+        <p className="text-sm text-gray3 mb-2">
+          Early-career roles only (0–2 years). Real jobs from Adzuna and employer boards.
         </p>
+        <p className="text-xs text-gray3 mb-4">
+          Use location below to find jobs near you.
+        </p>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {NEARBY_CITIES.map((loc) => (
+            <button
+              key={loc}
+              type="button"
+              onClick={() => setNearby(loc)}
+              className="rounded-full px-3 py-1.5 text-xs font-medium border border-stroke bg-dark text-gray2 hover:border-primaryFrom/50 hover:text-light transition-colors"
+            >
+              {loc}
+            </button>
+          ))}
+        </div>
         <div className="flex flex-col lg:flex-row gap-6">
           <aside className="lg:w-64 shrink-0">
             <form onSubmit={handleSearch} className="space-y-4 rounded-xl border border-stroke p-4 bg-dark">
@@ -122,6 +161,15 @@ function JobsContent() {
                   placeholder="e.g. USA"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-gray2">City or area (nearby)</Label>
+                <Input
+                  placeholder="e.g. San Francisco, Austin, 10001"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
                   className="mt-1"
                 />
               </div>
@@ -177,7 +225,8 @@ function JobsContent() {
               <span className="text-gray2">{total} jobs</span>
               <select
                 className="rounded-lg border border-stroke bg-dark px-3 py-2 text-sm text-light"
-                defaultValue="recent"
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
               >
                 <option value="recent">Most recent</option>
                 <option value="fit">Best recent-grad fit</option>
@@ -196,15 +245,25 @@ function JobsContent() {
               </div>
             ) : jobs.length === 0 ? (
               <div className="rounded-xl border border-stroke bg-dark p-6 text-center">
-                <p className="text-gray2">No jobs yet.</p>
+                <p className="text-gray2 font-medium">No jobs match your filters.</p>
                 <p className="text-sm text-gray3 mt-2">
-                  Add sample jobs: open a terminal, go to the <strong>gradops</strong> project folder, then run
+                  Try a different city, or clear location to see all {DEFAULT_COUNTRY} jobs.
                 </p>
-                <pre className="mt-3 text-left bg-darkBg border border-stroke rounded-lg p-4 text-sm text-gray2 overflow-x-auto">
-                  npm run db:setup
-                </pre>
-                <p className="text-sm text-gray3 mt-2">
-                  Or enable <a href="https://developer.adzuna.com" className="text-primary hover:underline">Adzuna</a> in .env and run <code className="bg-stroke px-1 rounded">npm run ingest</code>.
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-4"
+                  onClick={() => {
+                    setCity('');
+                    setRemote('');
+                    setQ('');
+                    setPage(1);
+                  }}
+                >
+                  Clear filters
+                </Button>
+                <p className="text-xs text-gray3 mt-6 pt-6 border-t border-stroke">
+                  Jobs are from real boards (e.g. <a href="https://developer.adzuna.com" className="text-primaryFrom hover:underline">Adzuna</a>). To get hundreds of fresh listings, run <code className="bg-stroke px-1 rounded">npm run ingest</code> with Adzuna keys in .env.
                 </p>
               </div>
             ) : (
